@@ -1,0 +1,7 @@
+{
+    "browser": "dev url",
+    "dev": "dev url",
+    "testing": "testing url",
+    "staging": "staging url",
+    "production": "production url"
+}

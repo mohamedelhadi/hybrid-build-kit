@@ -1,0 +1,14 @@
+{
+    "browser": {},
+    "dev": {},
+    "testing": {},
+    "staging": {},
+    "production": {},
+    "default": {
+        "defaultSrc": ["'self'", "gap:", "https://ssl.gstatic.com"],
+        "styleSrc": ["'self'", "'unsafe-inline'"],
+        "scriptSrc": ["'self'", "'unsafe-inline'"],
+        "connectSrc": ["'self'"],
+        "imgSrc": ["'self'", "data:"]
+    }
+}
