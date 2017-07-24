@@ -1,50 +1,53 @@
 {
-    "name": "hybrid-build-kit",
-    "version": "0.0.1",
-    "description": "",
-    "main": "umd/hybrid-build-kit.js",
-    "bin": {
-        "hybrid-build-kit": "bin/cli.js"
-    },
-    "types": "dist/index.d.ts",
-    "scripts": {
-        "cleanup": "shx rm -rf umd dist types",
-        "prebuild": "npm run cleanup",
-        "build": " tsc && tsc --target es2017 --outDir dist && webpack && webpack --env.prod",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/mohamedelhadi/hybrid-build-kit.git"
-    },
-    "author": "Mohamed Elhadi <mohamed-elhadi@live.com>",
-    "license": "MIT",
-    "engines": {
-        "node": ">=6.9"
-    },
-    "bugs": {
-        "url": "https://github.com/mohamedelhadi/hybrid-build-kit/issues"
-    },
-    "homepage": "https://github.com/mohamedelhadi/hybrid-build-kit#readme",
-    "dependencies": {
-        "@types/lodash": "4.14.71",
-        "chalk": "2.0.1",
-        "cheerio": "1.0.0-rc.2",
-        "commander": "2.11.0",
-        "content-security-policy-builder": "1.1.0",
-        "lodash": "4.17.4",
-        "shelljs": "0.7.8"
-    },
-    "devDependencies": {
-        "@types/node": "8.0.14",
-        "awesome-typescript-loader": "3.2.1",
-        "shx": "0.2.2",
-        "tslint": "5.5.0",
-        "tslint-config-airbnb": "5.2.1",
-        "typescript": "2.4.2",
-        "uglify-js": "3.0.25",
-        "uglifyjs-webpack-plugin": "0.4.6",
-        "webpack": "3.3.0",
-        "webpack-config-utils": "2.3.0"
-    }
+  "name": "hybrid-build-kit",
+  "version": "0.0.1",
+  "description": "",
+  "main": "umd/hybrid-build-kit",
+  "bin": {
+    "hybrid-build-kit": "bin/cli.js"
+  },
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "cleanup": "shx rm -rf umd dist types",
+    "prebuild": "npm run cleanup",
+    "build": " tsc && tsc --target es2017 --outDir dist && webpack && webpack --env.prod",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohamedelhadi/hybrid-build-kit.git"
+  },
+  "author": "Mohamed Elhadi <mohamed-elhadi@live.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=6.9"
+  },
+  "bugs": {
+    "url": "https://github.com/mohamedelhadi/hybrid-build-kit/issues"
+  },
+  "homepage": "https://github.com/mohamedelhadi/hybrid-build-kit#readme",
+  "dependencies": {
+    "@types/chalk": "0.4.31",
+    "@types/cheerio": "0.22.2",
+    "@types/lodash": "4.14.71",
+    "@types/shelljs": "0.7.2",
+    "chalk": "2.0.1",
+    "cheerio": "1.0.0-rc.2",
+    "commander": "2.11.0",
+    "content-security-policy-builder": "1.1.0",
+    "lodash": "4.17.4",
+    "shelljs": "0.7.8"
+  },
+  "devDependencies": {
+    "@types/node": "8.0.14",
+    "awesome-typescript-loader": "3.2.1",
+    "shx": "0.2.2",
+    "tslint": "5.5.0",
+    "tslint-config-airbnb": "5.2.1",
+    "typescript": "2.4.2",
+    "uglify-js": "3.0.25",
+    "uglifyjs-webpack-plugin": "0.4.6",
+    "webpack": "3.3.0",
+    "webpack-config-utils": "2.3.0"
+  }
 }

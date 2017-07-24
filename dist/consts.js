@@ -1,3 +1,4 @@
+"use strict";
 const environments = {
     browser: 'browser',
     dev: 'dev',

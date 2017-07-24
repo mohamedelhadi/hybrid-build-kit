@@ -1,23 +1,34 @@
+"use strict";
+import { environments } from './consts';
+import { getVersionDetails } from './version-helper';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs';
 import * as chalk from 'chalk';
+import * as cheerio from 'cheerio';
+// no @types so require instead of import
+const builder = require('content-security-policy-builder');
 export { initialize };
-async function initialize(env, platform) {
-    console.log(chalk.cyan('\nInitializing app..\n'));
+const root = path.join(process.cwd(), 'src');
+function initialize(env, platform) {
+    console.log(chalk.cyan('\nInitializing app..'));
     console.log('Targeted Environment: ', chalk.yellow(`${env}`));
-    console.log('Targeted Platform: ', chalk.yellow(`${platform}`));
+    console.log('Targeted Platform: ', chalk.yellow(`${platform}\n`));
     const configPromise = copyConfiguration(env);
-    return Promise.all([configPromise]);
+    const cordovaPromise = prepareCordovaConfig(env);
+    const indexPromise = prepareIndex(env, platform);
+    return Promise.all([configPromise, cordovaPromise, indexPromise]);
 }
 function copyConfiguration(env) {
+    console.log(`Copying ${env} configurations...`);
     return new Promise((resolve, reject) => {
-        console.log(`Copying ${env} configurations...`);
-        const appRoot = process.cwd();
-        const src = path.join(appRoot, `src/_build/configs/${env}.config.ts`);
-        const target = path.join(appRoot, 'src/app/env.config.ts');
+        const src = path.join(root, `_build/configs/${env}.config.ts`);
+        const target = path.join(root, 'app/env.config.ts');
         shelljs.cp(src, target);
-        if (shelljs.error()) {
-            console.log(chalk.red('\nCould not rename env config file!'));
+        const err = shelljs.error();
+        if (err) {
+            console.log(chalk.red(err));
+            console.log('\nFailed to copy env config file');
             console.log(`source: ${src}\ntarget: ${target}\n`);
             reject();
             return;
@@ -26,4 +37,144 @@ function copyConfiguration(env) {
         resolve();
     });
 }
+async function prepareCordovaConfig(env) {
+    console.log('Preparing config.xml...');
+    const details = await getConfigDetails(env);
+    return new Promise((resolve, reject) => {
+        const configPath = path.join(process.cwd(), 'config.xml');
+        const $ = cheerio.load(fs.readFileSync(configPath, 'utf8'), {
+            xmlMode: true,
+            decodeEntities: false
+        });
+        $('widget').attr('id', details.packageName);
+        $('name').text(details.appName);
+        $('access').first().attr('origin', details.endpoint);
+        $('allow-navigation').attr('href', details.endpoint);
+        $('widget').attr('version', details.versionDetails.version);
+        $('widget').attr('android-versionCode', details.versionDetails.androidVersionCode);
+        $('widget').attr('ios-CFBundleVersion', details.versionDetails.version);
+        fs.writeFile(configPath, $.html(), callback('Done preparing config.xml', 'Could not save config.xml!', resolve, reject));
+    });
+}
+async function prepareIndex(env, platform) {
+    console.log('Preparing index.html...');
+    const indexPath = path.join(root, 'index.html');
+    const $ = cheerio.load(fs.readFileSync(indexPath, 'utf8'), {
+        // to avoid converting single quotes (in content security policy) to &apos;
+        decodeEntities: false
+    });
+    // if targeted env is the browser, omit cordova.js otherwise add it
+    // cordova script performs an initialization that doesn't work on the browser
+    // so we remove it (however note that cordova script is required on an emulator/real device)
+    const cordovaScript = env === environments.browser || platform === 'pwa' ? '' : 'cordova.js';
+    $('#cordova-script').attr('src', cordovaScript);
+    let text = $('#service-worker').text();
+    if (platform === 'pwa') {
+        text = text.replace(/(\/\*|\*\/)/g, '');
+        $('#service-worker').text(text);
+    }
+    else {
+        if (text.indexOf('/*') === -1) {
+            $('#service-worker').text(`/*${text}*/`);
+        }
+    }
+    // Content-Security-Policy
+    const endpoint = await getEndpoint(env);
+    const csp = await getCSP(env, endpoint);
+    $('#csp').attr('content', csp);
+    return new Promise((resolve, reject) => {
+        fs.writeFile(indexPath, $.html(), callback('Done preparing index.html', 'Could not save index.html!', resolve, reject));
+    });
+}
+function getCSP(env, endpoint) {
+    return new Promise((resolve, reject) => {
+        const directives = {
+            defaultSrc: [],
+            styleSrc: [],
+            frameSrc: [],
+            imgSrc: [],
+            scriptSrc: [],
+            connectSrc: []
+        };
+        const whitelistPath = path.join(root, '_build/json/whitelist.json');
+        fs.readFile(whitelistPath, 'utf8', (err, data) => {
+            if (err) {
+                console.log(chalk.red('\nCould not read whitelist file!\npath: ${whitelistPath}'));
+                reject(err);
+                return;
+            }
+            const whitelist = JSON.parse(data);
+            // tslint:disable-next-line:forin
+            for (const key in whitelist) {
+                if (key === env || key === 'default') {
+                    const configs = whitelist[key];
+                    directives.defaultSrc = directives.defaultSrc.concat(configs.defaultSrc || []);
+                    directives.styleSrc = directives.styleSrc.concat(configs.styleSrc || []);
+                    directives.frameSrc = directives.frameSrc.concat(configs.frameSrc || []);
+                    directives.imgSrc = directives.imgSrc
+                        .concat(configs.imgSrc || [], endpoint);
+                    directives.scriptSrc = directives.scriptSrc
+                        .concat(configs.scriptSrc || [], endpoint);
+                    directives.connectSrc = directives.connectSrc
+                        .concat(configs.connectSrc || [], endpoint);
+                }
+            }
+            resolve(builder({
+                directives
+            }));
+        });
+    });
+}
+function callback(successMessage, errMessage, resolve, reject) {
+    return err => {
+        if (err) {
+            console.log(chalk.red(err));
+            console.log(chalk.white(errMessage + '\n'));
+            reject();
+        }
+        else {
+            console.log(chalk.green(successMessage));
+            resolve();
+        }
+    };
+}
+async function getConfigDetails(env) {
+    let appName = 'MyApp';
+    let packageName = 'com.example.myapp';
+    switch (env) {
+        case environments.production:
+            break;
+        default:
+            packageName = packageName + '.' + env;
+            appName = appName + ' - ' + env;
+    }
+    return {
+        packageName,
+        appName,
+        endpoint: await getEndpoint(env),
+        versionDetails: await getVersionDetails(env)
+    };
+}
+async function getEndpoint(env) {
+    const endpointsPath = path.join(root, '_build/json/endpoints.json');
+    const endpoints = JSON.parse(fs.readFileSync(endpointsPath, 'utf8'));
+    switch (env) {
+        case environments.browser:
+        case environments.dev:
+            return '*';
+        default:
+            return getOrigin(endpoints.env);
+    }
+}
+function getOrigin(url) {
+    return url.replace(/^((\w+:)?\/\/[^\/]+\/?).*$/, '$1').replace(/\/$/, '');
+}
+/* function copyResources(env, platform) {
+    console.log(chalk.cyan('Copying resources...'));
+    return new Promise((resolve, reject) => {
+        copy('src/environments/resources/' + platform + '/icons/' + env + '/*',
+        'resources/' + platform + '/icon',
+        callback('Done copying resources', 'Couldn\'t copy resources!', resolve, reject));
+    });
+}*/
 //# sourceMappingURL=initializer.js.map
