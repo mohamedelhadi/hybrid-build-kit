@@ -11,7 +11,6 @@ const builder = require('content-security-policy-builder');
 export { initialize };
 const root = path.join(process.cwd(), 'src');
 function initialize(env, platform) {
-    console.log(chalk.cyan('\nInitializing app..'));
     console.log('Targeted Environment: ', chalk.yellow(`${env}`));
     console.log('Targeted Platform: ', chalk.yellow(`${platform}\n`));
     const configPromise = copyConfiguration(env);

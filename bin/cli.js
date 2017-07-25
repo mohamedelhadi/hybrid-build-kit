@@ -9,22 +9,47 @@ const lib = require('../umd/hybrid-build-kit');
 const environments = lib.environments;
 const platforms = lib.platforms;
 const initializer = lib.initializer;
+const finalizer = lib.finalizer;
 
 program
     .version(pkg.version);
 
 program
     .command('initialize [env] [platform]')
-    .description('initializes the project with the specified env configurations')
+    .description('Initializes the project with the specified env configurations')
     .action(function (env = environments.browser, platform = platforms.android) {
+        console.log(chalk.cyan('\nInitializing..'));
         initializer.initialize(env, platform)
             .then(() => {
-                console.log(chalk.yellow(`Finished initialization.`));
+                console.log(chalk.yellow('Finished initialization.'));
             })
             .catch(err => {
-                console.log(chalk.redBright(`Initialization failed.`));
+                console.log(chalk.redBright('Initialization failed.'));
                 process.exit(1);
-            })
+            });
+    });
+
+program
+    .command('finalize [env] [platform]')
+    .description('Wraps up the build process')
+    .option("-c, --copy-output", "Which setup mode to use")
+    .action(function (env, platform = platforms.android, options) {
+        if (!env) {
+            console.log(chalk.red('env not specified'));
+            console.log(chalk.redBright('Finalization failed.'));
+            process.exit(1);
+        }
+        if (options.copyOutput) {
+            console.log(chalk.cyan('\nFinalizing..'));
+            finalizer.copyOutput(env, platform)
+                .then(() => {
+                    console.log(chalk.yellow('Finished finalization.'));
+                })
+                .catch(err => {
+                    console.log(chalk.redBright('Finalization failed.'));
+                    process.exit(1);
+                });
+        }
     });
 
 program
@@ -37,10 +62,10 @@ program
         const err = shell.error();
         if (err) {
             console.log(chalk.red(err));
-            console.log(chalk.redBright(`Setup failed.`));
+            console.log(chalk.redBright('Setup failed.'));
             process.exit(1);
         }
-        console.log(chalk.yellow(`Setup completed successfully.`));
+        console.log(chalk.yellow('Setup completed successfully.'));
     });
 
 program.parse(process.argv);
