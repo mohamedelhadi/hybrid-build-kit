@@ -3,6 +3,7 @@ const path = require('path');
 const shell = require('shelljs');
 const fs = require('fs');
 const cheerio = require('cheerio');
+var beautify_html = require('js-beautify').html;
 const config = require('../config.json');
 
 module.exports = {
@@ -35,7 +36,9 @@ function copyFiles() {
 function prepareIndex() {
     return new Promise((resolve, reject) => {
         const indexPath = path.join(process.cwd(), 'src/index.html');
-        const $ = cheerio.load(fs.readFileSync(indexPath, 'utf8'), {
+        // strip bom (UTF-8 with BOM to just UTF-8)
+        const content = fs.readFileSync(indexPath, 'utf8').replace(/^\uFEFF/, '');
+        const $ = cheerio.load(content, {
             // to avoid converting single quotes (in content security policy) to &apos;
             decodeEntities: false
         });
@@ -55,9 +58,10 @@ function prepareIndex() {
         if ($('#service-worker').length === 0) {
             $('<script src="" id="service-worker"></script>').insertAfter('#cordova-script');
         }
+        const html = beautify_html($.html());
         fs.writeFile(
             indexPath,
-            $.html(),
+            html,
             err => {
                 if (err) {
                     console.log(chalk.red(err));

@@ -7,6 +7,7 @@ import * as path from 'path';
 import * as shelljs from 'shelljs';
 import * as chalk from 'chalk';
 import * as cheerio from 'cheerio';
+import { html as beautify_html } from 'js-beautify';
 // no @types so require instead of import
 const builder = require('content-security-policy-builder');
 export { initialize };
@@ -59,7 +60,9 @@ async function prepareCordovaConfig(env) {
 async function prepareIndex(env, platform) {
     console.log('Preparing index.html...');
     const indexPath = path.join(root, 'index.html');
-    const $ = cheerio.load(fs.readFileSync(indexPath, 'utf8'), {
+    // strip bom (UTF-8 with BOM to just UTF-8)
+    const content = fs.readFileSync(indexPath, 'utf8').replace(/^\uFEFF/, '');
+    const $ = cheerio.load(content, {
         // to avoid converting single quotes (in content security policy) to &apos;
         decodeEntities: false
     });
@@ -74,8 +77,9 @@ async function prepareIndex(env, platform) {
     const csp = await getCSP(env, endpoint);
     $('#csp').attr('content', csp);
     $('title').text(config.app_name);
+    const html = beautify_html($.html());
     return new Promise((resolve, reject) => {
-        fs.writeFile(indexPath, $.html(), callback('Done preparing index.html', 'Could not save index.html!', resolve, reject));
+        fs.writeFile(indexPath, html, callback('Done preparing index.html', 'Could not save index.html!', resolve, reject));
     });
 }
 function getCSP(env, endpoint) {
