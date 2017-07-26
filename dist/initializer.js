@@ -1,7 +1,6 @@
 "use strict";
 import { environments } from './consts';
 import { getVersionDetails } from './version-helper';
-import { default as config } from '../config.json';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs';
@@ -12,13 +11,17 @@ import { html as beautify_html } from 'js-beautify';
 const builder = require('content-security-policy-builder');
 export { initialize };
 const root = path.join(process.cwd(), 'src');
+let settings;
+let endpoints;
 function initialize(env, platform) {
     console.log('Targeted Environment: ', chalk.yellow(`${env}`));
     console.log('Targeted Platform: ', chalk.yellow(`${platform}\n`));
     const configPromise = copyConfiguration(env);
     const cordovaPromise = prepareCordovaConfig(env);
     const indexPromise = prepareIndex(env, platform);
-    return Promise.all([configPromise, cordovaPromise, indexPromise]);
+    const endpointPromise = prepareEndpoint(env);
+    // TODO implement copy resources
+    return Promise.all([configPromise, cordovaPromise, indexPromise, endpointPromise]);
 }
 function copyConfiguration(env) {
     console.log(`Copying ${env} configurations...`);
@@ -73,10 +76,11 @@ async function prepareIndex(env, platform) {
     $('#cordova-script').attr('src', cordovaScript);
     $('#service-worker').attr('src', platform === 'pwa' ? 'pwa.js' : '');
     // Content-Security-Policy
-    const endpoint = await getEndpoint(env);
+    const endpoint = await getEndpointOrigin(env);
     const csp = await getCSP(env, endpoint);
     $('#csp').attr('content', csp);
-    $('title').text(config.app_name);
+    const settings = getSettings();
+    $('title').text(settings.app_name);
     const html = beautify_html($.html());
     return new Promise((resolve, reject) => {
         fs.writeFile(indexPath, html, callback('Done preparing index.html', 'Could not save index.html!', resolve, reject));
@@ -135,8 +139,9 @@ function callback(successMessage, errMessage, resolve, reject) {
     };
 }
 async function getConfigDetails(env) {
-    let appName = config.app_name;
-    let packageName = config.package_name;
+    const settings = getSettings();
+    let appName = settings.app_name;
+    let packageName = settings.package_name;
     switch (env) {
         case environments.production:
             break;
@@ -147,23 +152,54 @@ async function getConfigDetails(env) {
     return {
         packageName,
         appName,
-        endpoint: await getEndpoint(env),
+        endpoint: await getEndpointOrigin(env),
         versionDetails: await getVersionDetails(env)
     };
 }
-async function getEndpoint(env) {
-    const endpointsPath = path.join(root, '_build/json/endpoints.json');
-    const endpoints = JSON.parse(fs.readFileSync(endpointsPath, 'utf8'));
+async function getEndpointOrigin(env) {
     switch (env) {
         case environments.browser:
         case environments.dev:
             return '*';
         default:
-            return getOrigin(endpoints.env);
+            const endpoints = getEndpoints();
+            return getOrigin(endpoints[env]);
     }
 }
 function getOrigin(url) {
     return url.replace(/^((\w+:)?\/\/[^\/]+\/?).*$/, '$1').replace(/\/$/, '');
+}
+function prepareEndpoint(env) {
+    return new Promise((resolve, reject) => {
+        const endpoints = getEndpoints();
+        const endpoint = {
+            [env]: endpoints[env]
+        };
+        fs.writeFile(path.join(root, 'app/endpoint.json'), JSON.stringify(endpoint, null, '\t'), err => {
+            if (err) {
+                console.log(chalk.red(err.toString()));
+                console.log('Could not save endpoint file\n');
+                reject(err);
+            }
+            else {
+                resolve();
+            }
+        });
+    });
+}
+function getSettings() {
+    if (!settings) {
+        const settingsPath = path.join(root, '_build/settings.json');
+        settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    }
+    return settings;
+}
+function getEndpoints() {
+    if (!endpoints) {
+        const endpointsPath = path.join(root, '_build/json/endpoints.json');
+        endpoints = JSON.parse(fs.readFileSync(endpointsPath, 'utf8'));
+    }
+    return endpoints;
 }
 /* function copyResources(env, platform) {
     console.log(chalk.cyan('Copying resources...'));

@@ -39,9 +39,7 @@ async function getDetails(env: string) {
     return {
         segments,
         androidVersionCode: getAndroidVersionCode(segments),
-        version: `${segments[major]}.
-                ${segments[minor]}.
-                ${segments[patch]}`
+        version: `${segments[major]}.${segments[minor]}.${segments[patch]}`
     };
 }
 

@@ -1,5 +1,5 @@
-﻿import { IConfiguration, environments } from './configuration';
-import { production } from '../json/endpoints';
+﻿import { IConfiguration, environments } from '../_build/configs/configuration';
+import { production } from './endpoint.json';
 
 export class Configuration implements IConfiguration {
 

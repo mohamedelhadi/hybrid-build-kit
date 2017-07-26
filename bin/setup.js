@@ -4,7 +4,6 @@ const shell = require('shelljs');
 const fs = require('fs');
 const cheerio = require('cheerio');
 var beautify_html = require('js-beautify').html;
-const config = require('../config.json');
 
 module.exports = {
     run
@@ -13,8 +12,8 @@ module.exports = {
 function run() {
     const copyPromise = copyFiles();
     const indexPromise = prepareIndex();
-    const configPromise = prepareConfig();
-    return Promise.all([copyPromise, indexPromise, configPromise]);
+    const settingsPromise = prepareSettings();
+    return Promise.all([copyPromise, indexPromise, settingsPromise]);
 }
 
 function copyFiles() {
@@ -75,22 +74,24 @@ function prepareIndex() {
     });
 }
 
-function prepareConfig() {
+function prepareSettings() {
     return new Promise((resolve, reject) => {
         const configPath = path.join(process.cwd(), 'config.xml');
         const $ = cheerio.load(fs.readFileSync(configPath, 'utf8'), {
             xmlMode: true,
             decodeEntities: false
         });
-        config.app_name = $('name').text();
-        config.package_name = $('widget').attr('id');
+        const settings = {
+            app_name: $('name').text(),
+            package_name: $('widget').attr('id')
+        };
         fs.writeFile(
-            path.join(__dirname.replace('bin', ''), 'config.json'),
-            JSON.stringify(config, null, '\t'),
+            path.join(process.cwd(), 'src/_build/settings.json'),
+            JSON.stringify(settings, null, '\t'),
             err => {
                 if (err) {
                     console.log(chalk.red(err));
-                    console.log('Could not save app and package name to config file\n');
+                    console.log('Could not save app and package name to settings file\n');
                     reject(err);
                 } else {
                     resolve();
