@@ -4,7 +4,7 @@
   "description": "",
   "main": "umd/hybrid-build-kit",
   "bin": {
-    "hybrid-build-kit": "bin/cli.js"
+    "hybrid-build-kit": "bin/hybrid-build-kit.js"
   },
   "types": "dist/index.d.ts",
   "scripts": {

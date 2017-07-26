@@ -1,5 +1,6 @@
 import { environments, platforms } from './consts';
 import { getVersionDetails } from './version-helper';
+import { default as config } from '../config.json';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs';
@@ -82,20 +83,14 @@ async function prepareIndex(env: string, platform: string) {
     // so we remove it (however note that cordova script is required on an emulator/real device)
     const cordovaScript = env === environments.browser || platform === 'pwa' ? '' : 'cordova.js';
     $('#cordova-script').attr('src', cordovaScript);
+    $('#service-worker').attr('src', platform === 'pwa' ? 'pwa.js' : '');
 
-    let text = $('#service-worker').text();
-    if (platform === 'pwa') {
-        text = text.replace(/(\/\*|\*\/)/g, '');
-        $('#service-worker').text(text);
-    } else {
-        if (text.indexOf('/*') === -1) {
-            $('#service-worker').text(`/*${text}*/`);
-        }
-    }
     // Content-Security-Policy
     const endpoint = await getEndpoint(env);
     const csp = await getCSP(env, endpoint);
     $('#csp').attr('content', csp);
+
+    $('title').text(config.app_name);
 
     return new Promise((resolve, reject) => {
         fs.writeFile(
@@ -162,8 +157,8 @@ function callback(
 }
 
 async function getConfigDetails(env: string) {
-    let appName = 'MyApp';
-    let packageName = 'com.example.myapp';
+    let appName = config.app_name;
+    let packageName = config.package_name;
     switch (env) {
         case environments.production:
             break;
