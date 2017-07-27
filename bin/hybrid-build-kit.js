@@ -24,6 +24,9 @@ program
                 console.log(chalk.yellow('Finished initialization.'));
             })
             .catch(err => {
+                if (err) {
+                    console.log(err);
+                }
                 console.log(chalk.redBright('Initialization failed.'));
                 process.exit(1);
             });
@@ -46,6 +49,9 @@ program
                     console.log(chalk.yellow('Finished finalization.'));
                 })
                 .catch(err => {
+                    if (err) {
+                        console.log(err);
+                    }
                     console.log(chalk.redBright('Finalization failed.'));
                     process.exit(1);
                 });
@@ -61,6 +67,9 @@ program
                 console.log(chalk.yellow('Done setting up your project.'));
             })
             .catch(err => {
+                if (err) {
+                    console.log(err);
+                }
                 console.log(chalk.redBright('Failed to set up the project.'));
                 process.exit(1);
             });

@@ -24411,7 +24411,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 
 
 
-var root = __WEBPACK_IMPORTED_MODULE_2_path__["join"](process.cwd(), 'src');
+var root = __WEBPACK_IMPORTED_MODULE_2_path__["join"](process.cwd());
 // version segments
 var major = 0;
 var minor = 1;
@@ -24442,7 +24442,7 @@ function getVersionDetails(env) {
                     })];
                 case 4:
                     console.log(__WEBPACK_IMPORTED_MODULE_3_chalk__["red"]("\nUnknown env: '" + env + "'"));
-                    return [2 /*return*/, Promise.reject(new Error('Unknown environment'))];
+                    return [2 /*return*/, Promise.reject(null)];
             }
         });
     });
@@ -24530,7 +24530,7 @@ var initializer___generator = (this && this.__generator) || function (thisArg, b
 // no @types so require instead of import
 var builder = __webpack_require__(376);
 
-var initializer_root = __WEBPACK_IMPORTED_MODULE_3_path__["join"](process.cwd(), 'src');
+var initializer_root = process.cwd();
 var initializer_settings;
 var endpoints;
 function initialize(env, platform) {
@@ -24546,14 +24546,18 @@ function initialize(env, platform) {
 function copyConfiguration(env) {
     console.log("Copying " + env + " configurations...");
     return new Promise(function (resolve, reject) {
-        var src = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, "_build/configs/" + env + ".config.ts");
-        var target = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'app/env.config.ts');
-        __WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](src, target);
+        var configDir = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'src/app/config');
+        if (!__WEBPACK_IMPORTED_MODULE_2_fs__["existsSync"](configDir)) {
+            __WEBPACK_IMPORTED_MODULE_4_shelljs__["mkdir"]('-p', configDir);
+        }
+        var srcConfig = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, "_build/configs/configuration.ts");
+        __WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](srcConfig, configDir);
+        var srcEnv = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, "_build/configs/" + env + ".config.ts");
+        __WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](srcEnv, __WEBPACK_IMPORTED_MODULE_3_path__["join"](configDir, 'env.config.ts'));
         var err = __WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]();
         if (err) {
             console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err));
-            console.log('\nFailed to copy env config file');
-            console.log("source: " + src + "\ntarget: " + target + "\n");
+            console.log('\nFailed to copy env config files');
             reject();
             return;
         }
@@ -24572,15 +24576,15 @@ function prepareCordovaConfig(env) {
                 case 1:
                     details = _a.sent();
                     return [2 /*return*/, new Promise(function (resolve, reject) {
-                            var configPath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](process.cwd(), 'config.xml');
+                            var configPath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'config.xml');
                             var $ = __WEBPACK_IMPORTED_MODULE_6_cheerio__["load"](__WEBPACK_IMPORTED_MODULE_2_fs__["readFileSync"](configPath, 'utf8'), {
                                 xmlMode: true,
                                 decodeEntities: false
                             });
                             $('widget').attr('id', details.packageName);
                             $('name').text(details.appName);
-                            $('access').first().attr('origin', details.endpoint);
-                            $('allow-navigation').attr('href', details.endpoint);
+                            $('access').first().attr('origin', details.origin);
+                            $('allow-navigation').attr('href', details.origin);
                             $('widget').attr('version', details.versionDetails.version);
                             $('widget').attr('android-versionCode', details.versionDetails.androidVersionCode);
                             $('widget').attr('ios-CFBundleVersion', details.versionDetails.version);
@@ -24592,12 +24596,12 @@ function prepareCordovaConfig(env) {
 }
 function prepareIndex(env, platform) {
     return initializer___awaiter(this, void 0, void 0, function () {
-        var indexPath, content, $, cordovaScript, endpoint, csp, settings, html;
+        var indexPath, content, $, cordovaScript, origin, csp, settings, html;
         return initializer___generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     console.log('Preparing index.html...');
-                    indexPath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'index.html');
+                    indexPath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'src/index.html');
                     content = __WEBPACK_IMPORTED_MODULE_2_fs__["readFileSync"](indexPath, 'utf8').replace(/^\uFEFF/, '');
                     $ = __WEBPACK_IMPORTED_MODULE_6_cheerio__["load"](content, {
                         // to avoid converting single quotes (in content security policy) to &apos;
@@ -24608,8 +24612,8 @@ function prepareIndex(env, platform) {
                     $('#service-worker').attr('src', platform === 'pwa' ? 'pwa.js' : '');
                     return [4 /*yield*/, getEndpointOrigin(env)];
                 case 1:
-                    endpoint = _a.sent();
-                    return [4 /*yield*/, getCSP(env, endpoint)];
+                    origin = _a.sent();
+                    return [4 /*yield*/, getCSP(env, origin)];
                 case 2:
                     csp = _a.sent();
                     $('#csp').attr('content', csp);
@@ -24636,8 +24640,9 @@ function getCSP(env, endpoint) {
         var whitelistPath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, '_build/json/whitelist.json');
         __WEBPACK_IMPORTED_MODULE_2_fs__["readFile"](whitelistPath, 'utf8', function (err, data) {
             if (err) {
-                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"]('\nCould not read whitelist file!\npath: ${whitelistPath}'));
-                reject(err);
+                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err.toString()));
+                console.log('\nCould not read whitelist file!\npath: ${whitelistPath}');
+                reject();
                 return;
             }
             var whitelist = JSON.parse(data);
@@ -24697,7 +24702,7 @@ function getConfigDetails(env) {
                     };
                     return [4 /*yield*/, getEndpointOrigin(env)];
                 case 1:
-                    _a.endpoint = _b.sent();
+                    _a.origin = _b.sent();
                     return [4 /*yield*/, getVersionDetails(env)];
                 case 2: return [2 /*return*/, (_a.versionDetails = _b.sent(),
                         _a)];
@@ -24730,11 +24735,11 @@ function prepareEndpoint(env) {
         var endpoint = (_a = {},
             _a[env] = endpoints[env],
             _a);
-        __WEBPACK_IMPORTED_MODULE_2_fs__["writeFile"](__WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'app/endpoint.json'), JSON.stringify(endpoint, null, '\t'), function (err) {
+        __WEBPACK_IMPORTED_MODULE_2_fs__["writeFile"](__WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'src/app/config/endpoint.json'), JSON.stringify(endpoint, null, '\t'), function (err) {
             if (err) {
                 console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err.toString()));
                 console.log('Could not save endpoint file\n');
-                reject(err);
+                reject();
             }
             else {
                 resolve();
@@ -24845,14 +24850,16 @@ function copyOutput(env, platform) {
                     segments = (_a.sent()).segments;
                     formattedVersion = segments[0] + "." + pad(segments[1]) + "." + pad(segments[2], 3);
                     target = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](destination, env + "_" + formattedVersion + ".apk");
-                    finalizer___WEBPACK_IMPORTED_MODULE_4_shelljs__["rm"](target); // remove previous build with same version
+                    if (finalizer___WEBPACK_IMPORTED_MODULE_2_fs__["existsSync"](target)) {
+                        finalizer___WEBPACK_IMPORTED_MODULE_4_shelljs__["rm"](target); // remove previous build with same version
+                    }
                     finalizer___WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](source, target);
                     err = finalizer___WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]();
                     if (err) {
                         console.log(finalizer___WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err));
                         console.log('\nFailed to copy generated apk');
                         console.log("source: " + source + "\ntarget: " + target + "\n");
-                        return [2 /*return*/, Promise.reject(err)];
+                        return [2 /*return*/, Promise.reject(null)];
                     }
                     console.log(finalizer___WEBPACK_IMPORTED_MODULE_5_chalk__["green"]('Done copying output.'));
                     _a.label = 2;

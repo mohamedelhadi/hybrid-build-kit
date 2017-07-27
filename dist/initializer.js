@@ -10,7 +10,7 @@ import { html as beautify_html } from 'js-beautify';
 // no @types so require instead of import
 const builder = require('content-security-policy-builder');
 export { initialize };
-const root = path.join(process.cwd(), 'src');
+const root = process.cwd();
 let settings;
 let endpoints;
 function initialize(env, platform) {
@@ -26,14 +26,18 @@ function initialize(env, platform) {
 function copyConfiguration(env) {
     console.log(`Copying ${env} configurations...`);
     return new Promise((resolve, reject) => {
-        const src = path.join(root, `_build/configs/${env}.config.ts`);
-        const target = path.join(root, 'app/env.config.ts');
-        shelljs.cp(src, target);
+        const configDir = path.join(root, 'src/app/config');
+        if (!fs.existsSync(configDir)) {
+            shelljs.mkdir('-p', configDir);
+        }
+        const srcConfig = path.join(root, `_build/configs/configuration.ts`);
+        shelljs.cp(srcConfig, configDir);
+        const srcEnv = path.join(root, `_build/configs/${env}.config.ts`);
+        shelljs.cp(srcEnv, path.join(configDir, 'env.config.ts'));
         const err = shelljs.error();
         if (err) {
             console.log(chalk.red(err));
-            console.log('\nFailed to copy env config file');
-            console.log(`source: ${src}\ntarget: ${target}\n`);
+            console.log('\nFailed to copy env config files');
             reject();
             return;
         }
@@ -45,15 +49,15 @@ async function prepareCordovaConfig(env) {
     console.log('Preparing config.xml...');
     const details = await getConfigDetails(env);
     return new Promise((resolve, reject) => {
-        const configPath = path.join(process.cwd(), 'config.xml');
+        const configPath = path.join(root, 'config.xml');
         const $ = cheerio.load(fs.readFileSync(configPath, 'utf8'), {
             xmlMode: true,
             decodeEntities: false
         });
         $('widget').attr('id', details.packageName);
         $('name').text(details.appName);
-        $('access').first().attr('origin', details.endpoint);
-        $('allow-navigation').attr('href', details.endpoint);
+        $('access').first().attr('origin', details.origin);
+        $('allow-navigation').attr('href', details.origin);
         $('widget').attr('version', details.versionDetails.version);
         $('widget').attr('android-versionCode', details.versionDetails.androidVersionCode);
         $('widget').attr('ios-CFBundleVersion', details.versionDetails.version);
@@ -62,7 +66,7 @@ async function prepareCordovaConfig(env) {
 }
 async function prepareIndex(env, platform) {
     console.log('Preparing index.html...');
-    const indexPath = path.join(root, 'index.html');
+    const indexPath = path.join(root, 'src/index.html');
     // strip bom (UTF-8 with BOM to just UTF-8)
     const content = fs.readFileSync(indexPath, 'utf8').replace(/^\uFEFF/, '');
     const $ = cheerio.load(content, {
@@ -76,8 +80,8 @@ async function prepareIndex(env, platform) {
     $('#cordova-script').attr('src', cordovaScript);
     $('#service-worker').attr('src', platform === 'pwa' ? 'pwa.js' : '');
     // Content-Security-Policy
-    const endpoint = await getEndpointOrigin(env);
-    const csp = await getCSP(env, endpoint);
+    const origin = await getEndpointOrigin(env);
+    const csp = await getCSP(env, origin);
     $('#csp').attr('content', csp);
     const settings = getSettings();
     $('title').text(settings.app_name);
@@ -99,8 +103,9 @@ function getCSP(env, endpoint) {
         const whitelistPath = path.join(root, '_build/json/whitelist.json');
         fs.readFile(whitelistPath, 'utf8', (err, data) => {
             if (err) {
-                console.log(chalk.red('\nCould not read whitelist file!\npath: ${whitelistPath}'));
-                reject(err);
+                console.log(chalk.red(err.toString()));
+                console.log('\nCould not read whitelist file!\npath: ${whitelistPath}');
+                reject();
                 return;
             }
             const whitelist = JSON.parse(data);
@@ -152,7 +157,7 @@ async function getConfigDetails(env) {
     return {
         packageName,
         appName,
-        endpoint: await getEndpointOrigin(env),
+        origin: await getEndpointOrigin(env),
         versionDetails: await getVersionDetails(env)
     };
 }
@@ -175,11 +180,11 @@ function prepareEndpoint(env) {
         const endpoint = {
             [env]: endpoints[env]
         };
-        fs.writeFile(path.join(root, 'app/endpoint.json'), JSON.stringify(endpoint, null, '\t'), err => {
+        fs.writeFile(path.join(root, 'src/app/config/endpoint.json'), JSON.stringify(endpoint, null, '\t'), err => {
             if (err) {
                 console.log(chalk.red(err.toString()));
                 console.log('Could not save endpoint file\n');
-                reject(err);
+                reject();
             }
             else {
                 resolve();

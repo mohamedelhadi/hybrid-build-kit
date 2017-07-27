@@ -24,14 +24,16 @@ async function copyOutput(env, platform) {
         const { segments } = await getVersionDetails(env);
         const formattedVersion = `${segments[0]}.${pad(segments[1])}.${pad(segments[2], 3)}`;
         const target = path.join(destination, `${env}_${formattedVersion}.apk`);
-        shelljs.rm(target); // remove previous build with same version
+        if (fs.existsSync(target)) {
+            shelljs.rm(target); // remove previous build with same version
+        }
         shelljs.cp(source, target);
         const err = shelljs.error();
         if (err) {
             console.log(chalk.red(err));
             console.log('\nFailed to copy generated apk');
             console.log(`source: ${source}\ntarget: ${target}\n`);
-            return Promise.reject(err);
+            return Promise.reject(null);
         }
         console.log(chalk.green('Done copying output.'));
     }

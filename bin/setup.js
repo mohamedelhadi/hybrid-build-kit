@@ -19,13 +19,13 @@ function run() {
 function copyFiles() {
     return new Promise((resolve, reject) => {
         const source = path.join(__dirname.replace('bin', ''), 'setup/*');
-        const destination = path.join(process.cwd(), 'src');
+        const destination = path.join(process.cwd());
         shell.cp('-R', source, destination);
         const err = shell.error();
         if (err) {
             console.log(chalk.red(err));
             console.log("Could not copy files to project\n");
-            reject(err);
+            reject();
         } else {
             resolve();
         }
@@ -65,7 +65,7 @@ function prepareIndex() {
                 if (err) {
                     console.log(chalk.red(err));
                     console.log("Could not update index.html\n");
-                    reject(err);
+                    reject();
                 } else {
                     resolve();
                 }
@@ -86,13 +86,13 @@ function prepareSettings() {
             package_name: $('widget').attr('id')
         };
         fs.writeFile(
-            path.join(process.cwd(), 'src/_build/settings.json'),
+            path.join(process.cwd(), '_build/settings.json'),
             JSON.stringify(settings, null, '\t'),
             err => {
                 if (err) {
                     console.log(chalk.red(err));
                     console.log('Could not save app and package name to settings file\n');
-                    reject(err);
+                    reject();
                 } else {
                     resolve();
                 }

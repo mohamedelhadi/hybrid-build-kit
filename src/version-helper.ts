@@ -5,7 +5,7 @@ import * as chalk from 'chalk';
 
 export { getVersionDetails };
 
-const root = path.join(process.cwd(), 'src');
+const root = path.join(process.cwd());
 
 // version segments
 const major = 0;
@@ -28,7 +28,7 @@ async function getVersionDetails(env: string) {
             });
         default:
             console.log(chalk.red(`\nUnknown env: '${env}'`));
-            return Promise.reject(new Error('Unknown environment'));
+            return Promise.reject(null);
     }
 }
 

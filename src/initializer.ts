@@ -11,7 +11,7 @@ const builder = require('content-security-policy-builder');
 
 export { initialize };
 
-const root = path.join(process.cwd(), 'src');
+const root = process.cwd();
 let settings: ISettings;
 let endpoints: IEndpoints;
 
@@ -31,14 +31,21 @@ function initialize(env: string, platform: string) {
 function copyConfiguration(env: string) {
     console.log(`Copying ${env} configurations...`);
     return new Promise((resolve, reject) => {
-        const src = path.join(root, `_build/configs/${env}.config.ts`);
-        const target = path.join(root, 'app/env.config.ts');
-        shelljs.cp(src, target);
+        const configDir = path.join(root, 'src/app/config');
+        if (!fs.existsSync(configDir)) {
+            shelljs.mkdir('-p', configDir);
+        }
+
+        const srcConfig = path.join(root, `_build/configs/configuration.ts`);
+        shelljs.cp(srcConfig, configDir);
+
+        const srcEnv = path.join(root, `_build/configs/${env}.config.ts`);
+        shelljs.cp(srcEnv, path.join(configDir, 'env.config.ts'));
+
         const err = shelljs.error();
         if (err) {
             console.log(chalk.red(err));
-            console.log('\nFailed to copy env config file');
-            console.log(`source: ${src}\ntarget: ${target}\n`);
+            console.log('\nFailed to copy env config files');
             reject();
             return;
         }
@@ -51,7 +58,7 @@ async function prepareCordovaConfig(env: string) {
     console.log('Preparing config.xml...');
     const details = await getConfigDetails(env);
     return new Promise((resolve, reject) => {
-        const configPath = path.join(process.cwd(), 'config.xml');
+        const configPath = path.join(root, 'config.xml');
         const $ = cheerio.load(fs.readFileSync(configPath, 'utf8'), {
             xmlMode: true,
             decodeEntities: false
@@ -77,7 +84,7 @@ async function prepareCordovaConfig(env: string) {
 
 async function prepareIndex(env: string, platform: string) {
     console.log('Preparing index.html...');
-    const indexPath = path.join(root, 'index.html');
+    const indexPath = path.join(root, 'src/index.html');
     // strip bom (UTF-8 with BOM to just UTF-8)
     const content = fs.readFileSync(indexPath, 'utf8').replace(/^\uFEFF/, '');
     const $ = cheerio.load(content, {
@@ -122,8 +129,9 @@ function getCSP(env: string, endpoint: string) {
         const whitelistPath = path.join(root, '_build/json/whitelist.json');
         fs.readFile(whitelistPath, 'utf8', (err, data) => {
             if (err) {
-                console.log(chalk.red('\nCould not read whitelist file!\npath: ${whitelistPath}'));
-                reject(err);
+                console.log(chalk.red(err.toString()));
+                console.log('\nCould not read whitelist file!\npath: ${whitelistPath}');
+                reject();
                 return;
             }
             const whitelist = JSON.parse(data);
@@ -205,13 +213,13 @@ function prepareEndpoint(env: string) {
             [env]: endpoints[env]
         };
         fs.writeFile(
-            path.join(root, 'app/endpoint.json'),
+            path.join(root, 'src/app/config/endpoint.json'),
             JSON.stringify(endpoint, null, '\t'),
             err => {
                 if (err) {
                     console.log(chalk.red(err.toString()));
                     console.log('Could not save endpoint file\n');
-                    reject(err);
+                    reject();
                 } else {
                     resolve();
                 }
