@@ -24536,28 +24536,45 @@ var endpoints;
 function initialize(env, platform) {
     console.log('Targeted Environment: ', __WEBPACK_IMPORTED_MODULE_5_chalk__["yellow"]("" + env));
     console.log('Targeted Platform: ', __WEBPACK_IMPORTED_MODULE_5_chalk__["yellow"](platform + "\n"));
-    var configPromise = copyConfiguration(env);
+    var copyPromise = copy(env);
     var cordovaPromise = prepareCordovaConfig(env);
     var indexPromise = prepareIndex(env, platform);
     var endpointPromise = prepareEndpoint(env);
     // TODO implement copy resources
-    return Promise.all([configPromise, cordovaPromise, indexPromise, endpointPromise]);
+    return Promise.all([copyPromise, cordovaPromise, indexPromise, endpointPromise]);
 }
-function copyConfiguration(env) {
+function copy(env) {
     console.log("Copying " + env + " configurations...");
     return new Promise(function (resolve, reject) {
+        var errors = [];
         var configDir = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'src/app/config');
         if (!__WEBPACK_IMPORTED_MODULE_2_fs__["existsSync"](configDir)) {
             __WEBPACK_IMPORTED_MODULE_4_shelljs__["mkdir"]('-p', configDir);
+            if (__WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]()) {
+                errors.push(__WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]());
+            }
         }
-        var srcConfig = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, "_build/configs/configuration.ts");
-        __WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](srcConfig, configDir);
-        var srcEnv = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, "_build/configs/" + env + ".config.ts");
-        __WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](srcEnv, __WEBPACK_IMPORTED_MODULE_3_path__["join"](configDir, 'env.config.ts'));
-        var err = __WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]();
-        if (err) {
-            console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err));
-            console.log('\nFailed to copy env config files');
+        var configSrc = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, "_build/configs/configuration.ts");
+        __WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](configSrc, configDir);
+        if (__WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]()) {
+            errors.push(__WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]());
+        }
+        var envSrc = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, "_build/configs/" + env + ".config.ts");
+        __WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](envSrc, __WEBPACK_IMPORTED_MODULE_3_path__["join"](configDir, 'env.config.ts'));
+        if (__WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]()) {
+            errors.push(__WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]());
+        }
+        var pwaSrc = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, "src/pwa.js");
+        __WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](pwaSrc, 'www');
+        if (__WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]()) {
+            errors.push(__WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]());
+        }
+        if (errors.length) {
+            for (var _i = 0, errors_1 = errors; _i < errors_1.length; _i++) {
+                var err = errors_1[_i];
+                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err));
+            }
+            console.log('Error(s) occurred while copying files\n');
             reject();
             return;
         }

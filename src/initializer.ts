@@ -19,33 +19,50 @@ function initialize(env: string, platform: string) {
     console.log('Targeted Environment: ', chalk.yellow(`${env}`));
     console.log('Targeted Platform: ', chalk.yellow(`${platform}\n`));
 
-    const configPromise = copyConfiguration(env);
+    const copyPromise = copy(env);
     const cordovaPromise = prepareCordovaConfig(env);
     const indexPromise = prepareIndex(env, platform);
     const endpointPromise = prepareEndpoint(env);
     // TODO implement copy resources
 
-    return Promise.all([configPromise, cordovaPromise, indexPromise, endpointPromise]);
+    return Promise.all([copyPromise, cordovaPromise, indexPromise, endpointPromise]);
 }
 
-function copyConfiguration(env: string) {
+function copy(env: string) {
     console.log(`Copying ${env} configurations...`);
     return new Promise((resolve, reject) => {
+        const errors = [];
         const configDir = path.join(root, 'src/app/config');
         if (!fs.existsSync(configDir)) {
             shelljs.mkdir('-p', configDir);
+            if (shelljs.error()) {
+                errors.push(shelljs.error());
+            }
         }
 
-        const srcConfig = path.join(root, `_build/configs/configuration.ts`);
-        shelljs.cp(srcConfig, configDir);
+        const configSrc = path.join(root, `_build/configs/configuration.ts`);
+        shelljs.cp(configSrc, configDir);
+        if (shelljs.error()) {
+            errors.push(shelljs.error());
+        }
 
-        const srcEnv = path.join(root, `_build/configs/${env}.config.ts`);
-        shelljs.cp(srcEnv, path.join(configDir, 'env.config.ts'));
+        const envSrc = path.join(root, `_build/configs/${env}.config.ts`);
+        shelljs.cp(envSrc, path.join(configDir, 'env.config.ts'));
+        if (shelljs.error()) {
+            errors.push(shelljs.error());
+        }
 
-        const err = shelljs.error();
-        if (err) {
-            console.log(chalk.red(err));
-            console.log('\nFailed to copy env config files');
+        const pwaSrc = path.join(root, `src/pwa.js`);
+        shelljs.cp(pwaSrc, 'www');
+        if (shelljs.error()) {
+            errors.push(shelljs.error());
+        }
+
+        if (errors.length) {
+            for (const err of errors) {
+                console.log(chalk.red(err));
+            }
+            console.log('Error(s) occurred while copying files\n');
             reject();
             return;
         }
