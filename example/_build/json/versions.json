@@ -1,0 +1,7 @@
+{
+	"browser": "1.0.0",
+	"dev": "1.0.0",
+	"testing": "1.0.0",
+	"staging": "1.0.0",
+	"production": "1.0.0"
+}

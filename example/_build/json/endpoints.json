@@ -1,0 +1,7 @@
+{
+  "browser": "https://localhost",
+  "dev": "https://your-dev-server.com",
+  "testing": "https://your-testing-server.com",
+  "staging": "https://your-staging-server.com",
+  "production": "https://your-production-server.com"
+}

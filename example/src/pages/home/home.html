@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Home</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <h2>Welcome to Hybrid-Build-Kit Demo!</h2>
+  <p>
+    This project is built against '{{ config.environment }}' environment.
+  </p>
+  <h4>Current env config:</h4>
+  <p>
+    {{ config | json}}
+  </p>
+</ion-content>
