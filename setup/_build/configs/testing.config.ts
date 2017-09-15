@@ -1,19 +1,19 @@
-﻿import { IConfiguration, environments } from './configuration';
+﻿import { IConfiguration, Environments } from './configuration';
 import { testing } from './endpoint.json';
 
 export class Configuration implements IConfiguration {
 
-    public environment: string = environments.testing;
-    private baseUrl: string = testing;
+    private envUrl: string = testing;
+    public environment: string = Environments.testing;
 
     constructor() {
         // append "/" if it's not already appended
-        this.baseUrl = this.baseUrl.replace(/\/?(\?|#|$)/, '/$1');
+        this.envUrl = this.envUrl.replace(/\/?(\?|#|$)/, '/$1');
     }
-    public get BaseUrl(): string {
-        return this.baseUrl;
+    public get baseUrl(): string {
+        return this.envUrl;
     }
-    public static get Instance() {
+    public static get instance() {
         return new Configuration();
     }
 }

@@ -32,30 +32,27 @@ But before running the command there are few preparations that needs to be done.
 ```bash
 npm install hybrid-build-kit --save-dev
 ```
-<br/>
 
 #### 2. Run the setup command
 ```bash
 hybrid-build-kit setup
 ```
-This command will set up your project to support the library's commands by copying the necessary configuration files to your project and modify few other files.
+This command will set up your project to support the library. It does so by copying the necessary configuration files to your project and modify few other files.
 
-<br/>
 
 #### 3. Update **main.ts** file
 Found at *'project/src/app/main.ts'*, this file should be updated by adding the following lines
 ```javascript
 import { enableProdMode } from "@angular/core";
-import { environments } from "./config/configuration";
+import { Environments } from "./config/configuration";
 import { Configuration } from "./config/env.config";
 
-if (Configuration.Instance.environment === environments.production) {
+if (Configuration.instance.environment === Environments.production) {
     enableProdMode();
 }
 ```
 and that's before the line `platformBrowserDynamic().bootstrapModule(AppModule);`
 
-<br/>
 
 #### 4. Add 'Configuration' as a service (provider)
 This step is optional. But it's recommended to follow as best practice, and to benefit from angular's DI.
@@ -71,7 +68,6 @@ providers: [
 
 ```
 
-<br/>
 
 #### 5. Add environments' urls
 Head to *'project/_build/json/endpoints.json'* and enter the urls. It's not mandatory to enter urls for all of the environments, just the ones you are planning to target.
