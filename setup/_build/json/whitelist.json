@@ -1,5 +1,7 @@
 {
-    "browser": {},
+    "browser": {
+        "scriptSrc": ["'unsafe-eval'"]
+    },
     "dev": {},
     "testing": {},
     "staging": {},

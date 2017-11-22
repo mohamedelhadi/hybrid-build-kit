@@ -24483,6 +24483,8 @@ __webpack_require__.d(initializer_namespaceObject, "initialize", function() { re
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_cheerio___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_cheerio__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_js_beautify__ = __webpack_require__(374);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_js_beautify___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_js_beautify__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_content_security_policy_builder__ = __webpack_require__(376);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8_content_security_policy_builder___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8_content_security_policy_builder__);
 
 var initializer___awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -24527,8 +24529,7 @@ var initializer___generator = (this && this.__generator) || function (thisArg, b
 
 
 
-// no @types so require instead of import
-var builder = __webpack_require__(376);
+
 
 var initializer_root = process.cwd();
 var initializer_settings;
@@ -24678,7 +24679,7 @@ function getCSP(env, endpoint) {
                         .concat(configs.connectSrc || [], endpoint);
                 }
             }
-            resolve(builder({
+            resolve(__WEBPACK_IMPORTED_MODULE_8_content_security_policy_builder__({
                 directives: directives
             }));
         });
@@ -24779,14 +24780,6 @@ function getEndpoints() {
     }
     return endpoints;
 }
-/* function copyResources(env, platform) {
-    console.log(chalk.cyan('Copying resources...'));
-    return new Promise((resolve, reject) => {
-        copy('src/environments/resources/' + platform + '/icons/' + env + '/*',
-        'resources/' + platform + '/icon',
-        callback('Done copying resources', 'Couldn\'t copy resources!', resolve, reject));
-    });
-}*/
 
 // CONCATENATED MODULE: ./src/finalizer.ts
 var finalizer_namespaceObject = {};
@@ -24857,7 +24850,7 @@ function copyOutput(env, platform) {
                         'android-armv7-release' : 'android-release') + ".apk";
                     debugApk = "platforms/android/build/outputs/apk/" + (crosswalkBuild ?
                         'android-armv7-debug' : 'android-debug') + ".apk";
-                    source = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](finalizer_root, env === environments.production ? releaseApk : debugApk);
+                    source = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](finalizer_root, env === environments.production || env === environments.staging ? releaseApk : debugApk);
                     destination = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](finalizer_root, "bin/" + platform + "/" + env);
                     if (!finalizer___WEBPACK_IMPORTED_MODULE_2_fs__["existsSync"](destination)) {
                         finalizer___WEBPACK_IMPORTED_MODULE_4_shelljs__["mkdir"]('-p', destination);

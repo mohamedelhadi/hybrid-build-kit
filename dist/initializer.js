@@ -7,8 +7,7 @@ import * as shelljs from 'shelljs';
 import * as chalk from 'chalk';
 import * as cheerio from 'cheerio';
 import { html as beautify_html } from 'js-beautify';
-// no @types so require instead of import
-const builder = require('content-security-policy-builder');
+import * as builder from 'content-security-policy-builder';
 export { initialize };
 const root = process.cwd();
 let settings;
@@ -90,7 +89,7 @@ async function prepareIndex(env, platform) {
         decodeEntities: false
     });
     // if targeted env is the browser, omit cordova.js otherwise add it
-    // cordova script performs an initialization that doesn't work on the browser
+    // cordova script performs plugins initialization that doesn't work on the browser
     // so we remove it (however note that cordova script is required on an emulator/real device)
     const cordovaScript = env === environments.browser || platform === 'pwa' ? '' : 'cordova.js';
     $('#cordova-script').attr('src', cordovaScript);
@@ -222,12 +221,4 @@ function getEndpoints() {
     }
     return endpoints;
 }
-/* function copyResources(env, platform) {
-    console.log(chalk.cyan('Copying resources...'));
-    return new Promise((resolve, reject) => {
-        copy('src/environments/resources/' + platform + '/icons/' + env + '/*',
-        'resources/' + platform + '/icon',
-        callback('Done copying resources', 'Couldn\'t copy resources!', resolve, reject));
-    });
-}*/
 //# sourceMappingURL=initializer.js.map

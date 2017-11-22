@@ -20,7 +20,7 @@ async function copyOutput(env: string, platform: string) {
             'android-armv7-release' : 'android-release'}.apk`;
         const debugApk = `platforms/android/build/outputs/apk/${crosswalkBuild ?
             'android-armv7-debug' : 'android-debug'}.apk`;
-        const source = path.join(root, env === environments.production ? releaseApk : debugApk);
+        const source = path.join(root, env === environments.production || env === environments.staging ? releaseApk : debugApk);
 
         const destination = path.join(root, `bin/${platform}/${env}`);
         if (!fs.existsSync(destination)) {

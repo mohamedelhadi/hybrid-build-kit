@@ -80,6 +80,11 @@ Head to *'project/_build/json/endpoints.json'* and enter the urls. It's not mand
 ```
 Measurements are taken so that only the targeted environment's url will end up in the app bundle.
 
+#### 6. Add declarations.d.ts to your src folder, with the content below (allows importing json files as modules)
+```javascript
+declare module '*.json';
+```
+
 <br/>
 And that's it for setting up your project.
 
