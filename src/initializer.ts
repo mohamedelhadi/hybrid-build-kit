@@ -1,5 +1,5 @@
 import { environments, platforms } from './consts';
-import { getVersionDetails } from './version-helper';
+import { getVersionDetails, IVersionDetails } from './version-helper';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs';
@@ -11,8 +11,11 @@ import * as builder from 'content-security-policy-builder';
 export { initialize };
 
 const root = process.cwd();
-let settings: ISettings;
-let endpoints: IEndpoints;
+
+const cache: any = {};
+const ENDPOINTS = 'ENDPOINTS';
+const SETTINGS = 'SETTINGS';
+const VERSION_DETAILS = 'VERSION_DETAILS';
 
 function initialize(env: string, platform: string) {
     console.log('Targeted Environment: ', chalk.yellow(`${env}`));
@@ -22,9 +25,10 @@ function initialize(env: string, platform: string) {
     const cordovaPromise = prepareCordovaConfig(env);
     const indexPromise = prepareIndex(env, platform);
     const endpointPromise = prepareEndpoint(env);
+    const versionPromise = prepareVersion(env);
     // TODO implement copy resources
 
-    return Promise.all([copyPromise, cordovaPromise, indexPromise, endpointPromise]);
+    return Promise.all([copyPromise, cordovaPromise, indexPromise, endpointPromise, versionPromise]);
 }
 
 function copy(env: string) {
@@ -203,7 +207,7 @@ async function getConfigDetails(env: string) {
         packageName,
         appName,
         origin: await getEndpointOrigin(env),
-        versionDetails: await getVersionDetails(env)
+        versionDetails: await getEnvVersionDetails(env)
     };
 }
 
@@ -223,18 +227,30 @@ function getOrigin(url: string) {
 }
 
 function prepareEndpoint(env: string) {
+    const endpoints = getEndpoints();
+    const endpoint = {
+        [env]: endpoints[env]
+    };
+    return writeJSON('src/app/config/endpoint.json', endpoint);
+}
+
+async function prepareVersion(env: string) {
+    const versionDetails = await getEnvVersionDetails(env);
+    const version = {
+        version: versionDetails.version
+    };
+    return writeJSON('src/app/config/version.json', version);
+}
+
+function writeJSON(filePath: string, content: any) {
     return new Promise((resolve, reject) => {
-        const endpoints = getEndpoints();
-        const endpoint = {
-            [env]: endpoints[env]
-        };
         fs.writeFile(
-            path.join(root, 'src/app/config/endpoint.json'),
-            JSON.stringify(endpoint, null, '\t'),
+            path.join(root, filePath),
+            JSON.stringify(content, null, '\t'),
             err => {
                 if (err) {
                     console.log(chalk.red(err.toString()));
-                    console.log('Could not save endpoint file\n');
+                    console.log(`Could not write to: '${filePath}\n`);
                     reject();
                 } else {
                     resolve();
@@ -244,19 +260,29 @@ function prepareEndpoint(env: string) {
 }
 
 function getSettings() {
-    if (!settings) {
-        const settingsPath = path.join(root, '_build/settings.json');
-        settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    if (!cache[SETTINGS]) {
+        cache[SETTINGS] = readJSON('_build/settings.json');
     }
-    return settings;
+    return cache[SETTINGS] as ISettings;
 }
 
 function getEndpoints() {
-    if (!endpoints) {
-        const endpointsPath = path.join(root, '_build/json/endpoints.json');
-        endpoints = JSON.parse(fs.readFileSync(endpointsPath, 'utf8'));
+    if (!cache[ENDPOINTS]) {
+        cache[ENDPOINTS] = readJSON('_build/json/endpoints.json');
     }
-    return endpoints;
+    return cache[ENDPOINTS] as IEndpoints;
+}
+
+async function getEnvVersionDetails(env: string) {
+    if (!cache[VERSION_DETAILS]) {
+        cache[VERSION_DETAILS] = await getVersionDetails(env);
+    }
+    return cache[VERSION_DETAILS] as IVersionDetails;
+}
+
+function readJSON(filePath: string) {
+    const absolutePath = path.join(root, filePath);
+    return JSON.parse(fs.readFileSync(absolutePath, 'utf8'));
 }
 
 interface ISettings {

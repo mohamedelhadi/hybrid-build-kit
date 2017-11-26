@@ -1,6 +1,6 @@
 export interface IConfiguration {
-    mockApi?: boolean;
     environment: string;
+    version: string;
     baseUrl: string;
 }
 export const Environments = {

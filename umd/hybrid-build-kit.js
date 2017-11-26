@@ -24532,8 +24532,10 @@ var initializer___generator = (this && this.__generator) || function (thisArg, b
 
 
 var initializer_root = process.cwd();
-var initializer_settings;
-var endpoints;
+var cache = {};
+var ENDPOINTS = 'ENDPOINTS';
+var SETTINGS = 'SETTINGS';
+var VERSION_DETAILS = 'VERSION_DETAILS';
 function initialize(env, platform) {
     console.log('Targeted Environment: ', __WEBPACK_IMPORTED_MODULE_5_chalk__["yellow"]("" + env));
     console.log('Targeted Platform: ', __WEBPACK_IMPORTED_MODULE_5_chalk__["yellow"](platform + "\n"));
@@ -24541,8 +24543,9 @@ function initialize(env, platform) {
     var cordovaPromise = prepareCordovaConfig(env);
     var indexPromise = prepareIndex(env, platform);
     var endpointPromise = prepareEndpoint(env);
+    var versionPromise = prepareVersion(env);
     // TODO implement copy resources
-    return Promise.all([copyPromise, cordovaPromise, indexPromise, endpointPromise]);
+    return Promise.all([copyPromise, cordovaPromise, indexPromise, endpointPromise, versionPromise]);
 }
 function copy(env) {
     console.log("Copying " + env + " configurations...");
@@ -24721,7 +24724,7 @@ function getConfigDetails(env) {
                     return [4 /*yield*/, getEndpointOrigin(env)];
                 case 1:
                     _a.origin = _b.sent();
-                    return [4 /*yield*/, getVersionDetails(env)];
+                    return [4 /*yield*/, getEnvVersionDetails(env)];
                 case 2: return [2 /*return*/, (_a.versionDetails = _b.sent(),
                         _a)];
             }
@@ -24730,15 +24733,15 @@ function getConfigDetails(env) {
 }
 function getEndpointOrigin(env) {
     return initializer___awaiter(this, void 0, void 0, function () {
-        var endpoints_1;
+        var endpoints;
         return initializer___generator(this, function (_a) {
             switch (env) {
                 case environments.browser:
                 case environments.dev:
                     return [2 /*return*/, '*'];
                 default:
-                    endpoints_1 = getEndpoints();
-                    return [2 /*return*/, getOrigin(endpoints_1[env])];
+                    endpoints = getEndpoints();
+                    return [2 /*return*/, getOrigin(endpoints[env])];
             }
             return [2 /*return*/];
         });
@@ -24748,37 +24751,76 @@ function getOrigin(url) {
     return url.replace(/^((\w+:)?\/\/[^\/]+\/?).*$/, '$1').replace(/\/$/, '');
 }
 function prepareEndpoint(env) {
+    var endpoints = getEndpoints();
+    var endpoint = (_a = {},
+        _a[env] = endpoints[env],
+        _a);
+    return writeJSON('src/app/config/endpoint.json', endpoint);
+    var _a;
+}
+function prepareVersion(env) {
+    return initializer___awaiter(this, void 0, void 0, function () {
+        var versionDetails, version;
+        return initializer___generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, getEnvVersionDetails(env)];
+                case 1:
+                    versionDetails = _a.sent();
+                    version = {
+                        version: versionDetails.version
+                    };
+                    return [2 /*return*/, writeJSON('src/app/config/version.json', version)];
+            }
+        });
+    });
+}
+function writeJSON(filePath, content) {
     return new Promise(function (resolve, reject) {
-        var endpoints = getEndpoints();
-        var endpoint = (_a = {},
-            _a[env] = endpoints[env],
-            _a);
-        __WEBPACK_IMPORTED_MODULE_2_fs__["writeFile"](__WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, 'src/app/config/endpoint.json'), JSON.stringify(endpoint, null, '\t'), function (err) {
+        __WEBPACK_IMPORTED_MODULE_2_fs__["writeFile"](__WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, filePath), JSON.stringify(content, null, '\t'), function (err) {
             if (err) {
                 console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err.toString()));
-                console.log('Could not save endpoint file\n');
+                console.log("Could not write to: '" + filePath + "\n");
                 reject();
             }
             else {
                 resolve();
             }
         });
-        var _a;
     });
 }
 function getSettings() {
-    if (!initializer_settings) {
-        var settingsPath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, '_build/settings.json');
-        initializer_settings = JSON.parse(__WEBPACK_IMPORTED_MODULE_2_fs__["readFileSync"](settingsPath, 'utf8'));
+    if (!cache[SETTINGS]) {
+        cache[SETTINGS] = readJSON('_build/settings.json');
     }
-    return initializer_settings;
+    return cache[SETTINGS];
 }
 function getEndpoints() {
-    if (!endpoints) {
-        var endpointsPath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, '_build/json/endpoints.json');
-        endpoints = JSON.parse(__WEBPACK_IMPORTED_MODULE_2_fs__["readFileSync"](endpointsPath, 'utf8'));
+    if (!cache[ENDPOINTS]) {
+        cache[ENDPOINTS] = readJSON('_build/json/endpoints.json');
     }
-    return endpoints;
+    return cache[ENDPOINTS];
+}
+function getEnvVersionDetails(env) {
+    return initializer___awaiter(this, void 0, void 0, function () {
+        var _a, _b;
+        return initializer___generator(this, function (_c) {
+            switch (_c.label) {
+                case 0:
+                    if (!!cache[VERSION_DETAILS]) return [3 /*break*/, 2];
+                    _a = cache;
+                    _b = VERSION_DETAILS;
+                    return [4 /*yield*/, getVersionDetails(env)];
+                case 1:
+                    _a[_b] = _c.sent();
+                    _c.label = 2;
+                case 2: return [2 /*return*/, cache[VERSION_DETAILS]];
+            }
+        });
+    });
+}
+function readJSON(filePath) {
+    var absolutePath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, filePath);
+    return JSON.parse(__WEBPACK_IMPORTED_MODULE_2_fs__["readFileSync"](absolutePath, 'utf8'));
 }
 
 // CONCATENATED MODULE: ./src/finalizer.ts

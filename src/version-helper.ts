@@ -12,7 +12,7 @@ const major = 0;
 const minor = 1;
 const patch = 2;
 
-async function getVersionDetails(env: string) {
+async function getVersionDetails(env: string): Promise<IVersionDetails> {
     switch (env) {
         case environments.production:
         case environments.staging:
@@ -47,4 +47,10 @@ function getAndroidVersionCode(segments: string[]) {
     return parseInt(segments[major], 10) * 10000 +
         parseInt(segments[minor], 10) * 100 +
         parseInt(segments[patch], 10);
+}
+
+export interface IVersionDetails {
+    segments: string[];
+    androidVersionCode: number;
+    version: string;
 }

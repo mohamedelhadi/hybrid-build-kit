@@ -1,11 +1,12 @@
 ﻿import { IConfiguration, Environments } from './configuration';
 import { browser } from './endpoint.json';
+import { version } from './version.json';
 
 export class Configuration implements IConfiguration {
 
     private envUrl: string = browser;
     public environment: string = Environments.browser;
-    public mockApi = false;
+    public version: string = version;
 
     constructor() {
         // append "/" if it's not already appended
