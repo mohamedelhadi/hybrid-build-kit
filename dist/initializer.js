@@ -4,7 +4,7 @@ import { getVersionDetails } from './version-helper';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import * as cheerio from 'cheerio';
 import { html as beautify_html } from 'js-beautify';
 import * as builder from 'content-security-policy-builder';
@@ -23,7 +23,13 @@ function initialize(env, platform) {
     const endpointPromise = prepareEndpoint(env);
     const versionPromise = prepareVersion(env);
     // TODO implement copy resources
-    return Promise.all([copyPromise, cordovaPromise, indexPromise, endpointPromise, versionPromise]);
+    return Promise.all([
+        copyPromise,
+        cordovaPromise,
+        indexPromise,
+        endpointPromise,
+        versionPromise
+    ]);
 }
 function copy(env) {
     console.log(`Copying ${env} configurations...`);
@@ -74,7 +80,9 @@ async function prepareCordovaConfig(env) {
         });
         $('widget').attr('id', details.packageName);
         $('name').text(details.appName);
-        $('access').first().attr('origin', details.origin);
+        $('access')
+            .first()
+            .attr('origin', details.origin);
         $('allow-navigation').attr('href', details.origin);
         $('widget').attr('version', details.versionDetails.version);
         $('widget').attr('android-versionCode', details.versionDetails.androidVersionCode);
@@ -103,7 +111,9 @@ async function prepareIndex(env, platform) {
     $('#csp').attr('content', csp);
     const settings = getSettings();
     $('title').text(settings.app_name);
-    const html = beautify_html($.html());
+    const html = beautify_html($.html(), {
+        preserve_newlines: false
+    });
     return new Promise((resolve, reject) => {
         fs.writeFile(indexPath, html, callback('Done preparing index.html', 'Could not save index.html!', resolve, reject));
     });
@@ -134,12 +144,9 @@ function getCSP(env, endpoint) {
                     directives.defaultSrc = directives.defaultSrc.concat(configs.defaultSrc || []);
                     directives.styleSrc = directives.styleSrc.concat(configs.styleSrc || []);
                     directives.frameSrc = directives.frameSrc.concat(configs.frameSrc || []);
-                    directives.imgSrc = directives.imgSrc
-                        .concat(configs.imgSrc || [], endpoint);
-                    directives.scriptSrc = directives.scriptSrc
-                        .concat(configs.scriptSrc || [], endpoint);
-                    directives.connectSrc = directives.connectSrc
-                        .concat(configs.connectSrc || [], endpoint);
+                    directives.imgSrc = directives.imgSrc.concat(configs.imgSrc || [], endpoint);
+                    directives.scriptSrc = directives.scriptSrc.concat(configs.scriptSrc || [], endpoint);
+                    directives.connectSrc = directives.connectSrc.concat(configs.connectSrc || [], endpoint);
                 }
             }
             resolve(builder({

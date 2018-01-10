@@ -4,7 +4,7 @@ import { getVersionDetails } from './version-helper';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 const padStart = require('lodash/padStart');
 const root = process.cwd();
 export { copyOutput };
@@ -12,11 +12,11 @@ async function copyOutput(env, platform) {
     if (platform === platforms.android) {
         console.log('Copying ' + platform + ' build output..');
         const crosswalkBuild = isCrosswalkBuild();
-        const releaseApk = `platforms/android/build/outputs/apk/${crosswalkBuild ?
-            'android-armv7-release' : 'android-release'}.apk`;
-        const debugApk = `platforms/android/build/outputs/apk/${crosswalkBuild ?
-            'android-armv7-debug' : 'android-debug'}.apk`;
-        const source = path.join(root, env === environments.production || env === environments.staging ? releaseApk : debugApk);
+        const releaseApk = `platforms/android/build/outputs/apk/${crosswalkBuild ? 'android-armv7-release' : 'android-release'}.apk`;
+        const debugApk = `platforms/android/build/outputs/apk/${crosswalkBuild ? 'android-armv7-debug' : 'android-debug'}.apk`;
+        const source = path.join(root, env === environments.production || env === environments.staging
+            ? releaseApk
+            : debugApk);
         const destination = path.join(root, `bin/${platform}/${env}`);
         if (!fs.existsSync(destination)) {
             shelljs.mkdir('-p', destination);
@@ -44,9 +44,9 @@ function isCrosswalkBuild() {
     }
     const pkgPath = path.join(root, 'package.json');
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-    return pkg.cordova &&
+    return (pkg.cordova &&
         pkg.cordova.plugins &&
-        pkg.cordova.plugins['cordova-plugin-crosswalk-webview'];
+        pkg.cordova.plugins['cordova-plugin-crosswalk-webview']);
 }
 function pad(segment, length = 2) {
     return padStart(segment, length, '0');

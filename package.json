@@ -1,6 +1,6 @@
 {
   "name": "hybrid-build-kit",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A library for multi-env builds",
   "main": "umd/hybrid-build-kit",
   "bin": {
@@ -10,7 +10,8 @@
   "scripts": {
     "cleanup": "shx rm -rf umd dist types",
     "prebuild": "npm run cleanup",
-    "build": " tsc && tsc --target es2017 --outDir dist && webpack && webpack --env.prod",
+    "build":
+      " tsc && tsc --target es2017 --outDir dist && webpack && webpack --env.prod",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,12 +28,12 @@
   },
   "homepage": "https://github.com/mohamedelhadi/hybrid-build-kit#readme",
   "dependencies": {
-    "@types/chalk": "0.4.31",
+    "@types/chalk": "^2.2.0",
     "@types/cheerio": "0.22.2",
     "@types/js-beautify": "0.0.30",
     "@types/lodash": "4.14.71",
     "@types/shelljs": "0.7.2",
-    "chalk": "2.0.1",
+    "chalk": "2.3.0",
     "cheerio": "1.0.0-rc.2",
     "commander": "2.11.0",
     "content-security-policy-builder": "1.1.0",
@@ -51,5 +52,8 @@
     "uglifyjs-webpack-plugin": "0.4.6",
     "webpack": "3.3.0",
     "webpack-config-utils": "2.3.0"
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }

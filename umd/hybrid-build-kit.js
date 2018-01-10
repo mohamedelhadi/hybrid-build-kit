@@ -24441,7 +24441,7 @@ function getVersionDetails(env) {
                         androidVersionCode: 100000
                     })];
                 case 4:
-                    console.log(__WEBPACK_IMPORTED_MODULE_3_chalk__["red"]("\nUnknown env: '" + env + "'"));
+                    console.log(__WEBPACK_IMPORTED_MODULE_3_chalk___default.a.red("\nUnknown env: '" + env + "'"));
                     return [2 /*return*/, Promise.reject(null)];
             }
         });
@@ -24463,9 +24463,9 @@ function getDetails(env) {
     });
 }
 function getAndroidVersionCode(segments) {
-    return parseInt(segments[major], 10) * 10000 +
+    return (parseInt(segments[major], 10) * 10000 +
         parseInt(segments[minor], 10) * 100 +
-        parseInt(segments[patch], 10);
+        parseInt(segments[patch], 10));
 }
 
 // CONCATENATED MODULE: ./src/initializer.ts
@@ -24537,15 +24537,21 @@ var ENDPOINTS = 'ENDPOINTS';
 var SETTINGS = 'SETTINGS';
 var VERSION_DETAILS = 'VERSION_DETAILS';
 function initialize(env, platform) {
-    console.log('Targeted Environment: ', __WEBPACK_IMPORTED_MODULE_5_chalk__["yellow"]("" + env));
-    console.log('Targeted Platform: ', __WEBPACK_IMPORTED_MODULE_5_chalk__["yellow"](platform + "\n"));
+    console.log('Targeted Environment: ', __WEBPACK_IMPORTED_MODULE_5_chalk___default.a.yellow("" + env));
+    console.log('Targeted Platform: ', __WEBPACK_IMPORTED_MODULE_5_chalk___default.a.yellow(platform + "\n"));
     var copyPromise = copy(env);
     var cordovaPromise = prepareCordovaConfig(env);
     var indexPromise = prepareIndex(env, platform);
     var endpointPromise = prepareEndpoint(env);
     var versionPromise = prepareVersion(env);
     // TODO implement copy resources
-    return Promise.all([copyPromise, cordovaPromise, indexPromise, endpointPromise, versionPromise]);
+    return Promise.all([
+        copyPromise,
+        cordovaPromise,
+        indexPromise,
+        endpointPromise,
+        versionPromise
+    ]);
 }
 function copy(env) {
     console.log("Copying " + env + " configurations...");
@@ -24576,13 +24582,13 @@ function copy(env) {
         if (errors.length) {
             for (var _i = 0, errors_1 = errors; _i < errors_1.length; _i++) {
                 var err = errors_1[_i];
-                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err));
+                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk___default.a.red(err));
             }
             console.log('Error(s) occurred while copying files\n');
             reject();
             return;
         }
-        console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["green"]("Done copying " + env + " configurations"));
+        console.log(__WEBPACK_IMPORTED_MODULE_5_chalk___default.a.green("Done copying " + env + " configurations"));
         resolve();
     });
 }
@@ -24604,7 +24610,9 @@ function prepareCordovaConfig(env) {
                             });
                             $('widget').attr('id', details.packageName);
                             $('name').text(details.appName);
-                            $('access').first().attr('origin', details.origin);
+                            $('access')
+                                .first()
+                                .attr('origin', details.origin);
                             $('allow-navigation').attr('href', details.origin);
                             $('widget').attr('version', details.versionDetails.version);
                             $('widget').attr('android-versionCode', details.versionDetails.androidVersionCode);
@@ -24640,7 +24648,9 @@ function prepareIndex(env, platform) {
                     $('#csp').attr('content', csp);
                     settings = getSettings();
                     $('title').text(settings.app_name);
-                    html = Object(__WEBPACK_IMPORTED_MODULE_7_js_beautify__["html"])($.html());
+                    html = Object(__WEBPACK_IMPORTED_MODULE_7_js_beautify__["html"])($.html(), {
+                        preserve_newlines: false
+                    });
                     return [2 /*return*/, new Promise(function (resolve, reject) {
                             __WEBPACK_IMPORTED_MODULE_2_fs__["writeFile"](indexPath, html, callback('Done preparing index.html', 'Could not save index.html!', resolve, reject));
                         })];
@@ -24661,7 +24671,7 @@ function getCSP(env, endpoint) {
         var whitelistPath = __WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, '_build/json/whitelist.json');
         __WEBPACK_IMPORTED_MODULE_2_fs__["readFile"](whitelistPath, 'utf8', function (err, data) {
             if (err) {
-                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err.toString()));
+                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk___default.a.red(err.toString()));
                 console.log('\nCould not read whitelist file!\npath: ${whitelistPath}');
                 reject();
                 return;
@@ -24674,12 +24684,9 @@ function getCSP(env, endpoint) {
                     directives.defaultSrc = directives.defaultSrc.concat(configs.defaultSrc || []);
                     directives.styleSrc = directives.styleSrc.concat(configs.styleSrc || []);
                     directives.frameSrc = directives.frameSrc.concat(configs.frameSrc || []);
-                    directives.imgSrc = directives.imgSrc
-                        .concat(configs.imgSrc || [], endpoint);
-                    directives.scriptSrc = directives.scriptSrc
-                        .concat(configs.scriptSrc || [], endpoint);
-                    directives.connectSrc = directives.connectSrc
-                        .concat(configs.connectSrc || [], endpoint);
+                    directives.imgSrc = directives.imgSrc.concat(configs.imgSrc || [], endpoint);
+                    directives.scriptSrc = directives.scriptSrc.concat(configs.scriptSrc || [], endpoint);
+                    directives.connectSrc = directives.connectSrc.concat(configs.connectSrc || [], endpoint);
                 }
             }
             resolve(__WEBPACK_IMPORTED_MODULE_8_content_security_policy_builder__({
@@ -24691,12 +24698,12 @@ function getCSP(env, endpoint) {
 function callback(successMessage, errMessage, resolve, reject) {
     return function (err) {
         if (err) {
-            console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err));
-            console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["white"](errMessage + '\n'));
+            console.log(__WEBPACK_IMPORTED_MODULE_5_chalk___default.a.red(err));
+            console.log(__WEBPACK_IMPORTED_MODULE_5_chalk___default.a.white(errMessage + '\n'));
             reject();
         }
         else {
-            console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["green"](successMessage));
+            console.log(__WEBPACK_IMPORTED_MODULE_5_chalk___default.a.green(successMessage));
             resolve();
         }
     };
@@ -24778,7 +24785,7 @@ function writeJSON(filePath, content) {
     return new Promise(function (resolve, reject) {
         __WEBPACK_IMPORTED_MODULE_2_fs__["writeFile"](__WEBPACK_IMPORTED_MODULE_3_path__["join"](initializer_root, filePath), JSON.stringify(content, null, '\t'), function (err) {
             if (err) {
-                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err.toString()));
+                console.log(__WEBPACK_IMPORTED_MODULE_5_chalk___default.a.red(err.toString()));
                 console.log("Could not write to: '" + filePath + "\n");
                 reject();
             }
@@ -24888,11 +24895,11 @@ function copyOutput(env, platform) {
                     if (!(platform === platforms.android)) return [3 /*break*/, 2];
                     console.log('Copying ' + platform + ' build output..');
                     crosswalkBuild = isCrosswalkBuild();
-                    releaseApk = "platforms/android/build/outputs/apk/" + (crosswalkBuild ?
-                        'android-armv7-release' : 'android-release') + ".apk";
-                    debugApk = "platforms/android/build/outputs/apk/" + (crosswalkBuild ?
-                        'android-armv7-debug' : 'android-debug') + ".apk";
-                    source = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](finalizer_root, env === environments.production || env === environments.staging ? releaseApk : debugApk);
+                    releaseApk = "platforms/android/build/outputs/apk/" + (crosswalkBuild ? 'android-armv7-release' : 'android-release') + ".apk";
+                    debugApk = "platforms/android/build/outputs/apk/" + (crosswalkBuild ? 'android-armv7-debug' : 'android-debug') + ".apk";
+                    source = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](finalizer_root, env === environments.production || env === environments.staging
+                        ? releaseApk
+                        : debugApk);
                     destination = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](finalizer_root, "bin/" + platform + "/" + env);
                     if (!finalizer___WEBPACK_IMPORTED_MODULE_2_fs__["existsSync"](destination)) {
                         finalizer___WEBPACK_IMPORTED_MODULE_4_shelljs__["mkdir"]('-p', destination);
@@ -24908,12 +24915,12 @@ function copyOutput(env, platform) {
                     finalizer___WEBPACK_IMPORTED_MODULE_4_shelljs__["cp"](source, target);
                     err = finalizer___WEBPACK_IMPORTED_MODULE_4_shelljs__["error"]();
                     if (err) {
-                        console.log(finalizer___WEBPACK_IMPORTED_MODULE_5_chalk__["red"](err));
+                        console.log(finalizer___WEBPACK_IMPORTED_MODULE_5_chalk___default.a.red(err));
                         console.log('\nFailed to copy generated apk');
                         console.log("source: " + source + "\ntarget: " + target + "\n");
                         return [2 /*return*/, Promise.reject(null)];
                     }
-                    console.log(finalizer___WEBPACK_IMPORTED_MODULE_5_chalk__["green"]('Done copying output.'));
+                    console.log(finalizer___WEBPACK_IMPORTED_MODULE_5_chalk___default.a.green('Done copying output.'));
                     _a.label = 2;
                 case 2: return [2 /*return*/];
             }
@@ -24926,9 +24933,9 @@ function isCrosswalkBuild() {
     }
     var pkgPath = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](finalizer_root, 'package.json');
     var pkg = JSON.parse(finalizer___WEBPACK_IMPORTED_MODULE_2_fs__["readFileSync"](pkgPath, 'utf8'));
-    return pkg.cordova &&
+    return (pkg.cordova &&
         pkg.cordova.plugins &&
-        pkg.cordova.plugins['cordova-plugin-crosswalk-webview'];
+        pkg.cordova.plugins['cordova-plugin-crosswalk-webview']);
 }
 function pad(segment, length) {
     if (length === void 0) { length = 2; }

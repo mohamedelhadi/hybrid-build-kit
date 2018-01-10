@@ -2,7 +2,7 @@
 import { environments } from './consts';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 export { getVersionDetails };
 const root = path.join(process.cwd());
 // version segments
@@ -39,8 +39,8 @@ async function getDetails(env) {
     };
 }
 function getAndroidVersionCode(segments) {
-    return parseInt(segments[major], 10) * 10000 +
+    return (parseInt(segments[major], 10) * 10000 +
         parseInt(segments[minor], 10) * 100 +
-        parseInt(segments[patch], 10);
+        parseInt(segments[patch], 10));
 }
 //# sourceMappingURL=version-helper.js.map
