@@ -207,11 +207,10 @@ function prepareEndpoint(env) {
     return writeJSON('src/app/config/endpoint.json', endpoint);
 }
 async function prepareVersion(env) {
-    const versionDetails = await getEnvVersionDetails(env);
-    const version = {
-        version: versionDetails.version
-    };
-    return writeJSON('src/app/config/version.json', version);
+    const { version } = await getEnvVersionDetails(env);
+    return writeJSON('src/app/config/version.json', {
+        version
+    });
 }
 function writeJSON(filePath, content) {
     return new Promise((resolve, reject) => {

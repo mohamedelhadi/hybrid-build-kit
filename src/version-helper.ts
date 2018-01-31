@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import chalk from 'chalk';
 
-export { getVersionDetails };
+export { getVersionDetails, major, minor, patch, patchDigits, minorDigits };
 
 const root = path.join(process.cwd());
 
@@ -11,6 +11,9 @@ const root = path.join(process.cwd());
 const major = 0;
 const minor = 1;
 const patch = 2;
+
+const patchDigits = 3;
+const minorDigits = 2;
 
 async function getVersionDetails(env: string): Promise<IVersionDetails> {
   switch (env) {
@@ -20,7 +23,7 @@ async function getVersionDetails(env: string): Promise<IVersionDetails> {
       return await getDetails(env);
     case environments.dev:
     case environments.browser:
-      // there is no value in increasing development version
+      // no value in increasing development version?
       return Promise.resolve({
         version: '1.0.0',
         segments: '1.0.0'.split('.'),
@@ -44,11 +47,19 @@ async function getDetails(env: string) {
 }
 
 function getAndroidVersionCode(segments: string[]) {
+  // given version xx.yy.zzz, maximum possible version code is: 9,999,999
+  // maximum version code value allowed by google play is: 2,100,000,000
+  // https://developer.android.com/studio/publish/versioning.html
   return (
-    parseInt(segments[major], 10) * 10000 +
-    parseInt(segments[minor], 10) * 100 +
+    parseInt(segments[major], 10) * getRange(minorDigits + patchDigits) +
+    parseInt(segments[minor], 10) * getRange(patchDigits) +
     parseInt(segments[patch], 10)
   );
+}
+
+function getRange(zerosToAdd: number) {
+  const digits = zerosToAdd + 1;
+  return +'1'.padEnd(digits, '0');
 }
 
 export interface IVersionDetails {

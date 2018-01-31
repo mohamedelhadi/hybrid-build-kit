@@ -1,11 +1,10 @@
 "use strict";
 import { environments, platforms } from './consts';
-import { getVersionDetails } from './version-helper';
+import { getVersionDetails, minorDigits, patchDigits, major, minor, patch } from './version-helper';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs';
 import chalk from 'chalk';
-const padStart = require('lodash/padStart');
 const root = process.cwd();
 export { copyOutput };
 async function copyOutput(env, platform) {
@@ -22,7 +21,7 @@ async function copyOutput(env, platform) {
             shelljs.mkdir('-p', destination);
         }
         const { segments } = await getVersionDetails(env);
-        const formattedVersion = `${segments[0]}.${pad(segments[1])}.${pad(segments[2], 3)}`;
+        const formattedVersion = `${segments[major]}.${pad(segments[minor], minorDigits)}.${pad(segments[patch], patchDigits)}`;
         const target = path.join(destination, `${env}_${formattedVersion}.apk`);
         if (fs.existsSync(target)) {
             shelljs.rm(target); // remove previous build with same version
@@ -48,7 +47,7 @@ function isCrosswalkBuild() {
         pkg.cordova.plugins &&
         pkg.cordova.plugins['cordova-plugin-crosswalk-webview']);
 }
-function pad(segment, length = 2) {
-    return padStart(segment, length, '0');
+function pad(segment, length) {
+    return segment.padStart(length, '0');
 }
 //# sourceMappingURL=finalizer.js.map

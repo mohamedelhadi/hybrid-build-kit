@@ -1,10 +1,16 @@
 import { environments, platforms } from './consts';
-import { getVersionDetails } from './version-helper';
+import {
+  getVersionDetails,
+  minorDigits,
+  patchDigits,
+  major,
+  minor,
+  patch
+} from './version-helper';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as shelljs from 'shelljs';
 import chalk from 'chalk';
-const padStart = require('lodash/padStart');
 
 const root = process.cwd();
 
@@ -32,10 +38,10 @@ async function copyOutput(env: string, platform: string) {
       shelljs.mkdir('-p', destination);
     }
     const { segments } = await getVersionDetails(env);
-    const formattedVersion = `${segments[0]}.${pad(segments[1])}.${pad(
-      segments[2],
-      3
-    )}`;
+    const formattedVersion = `${segments[major]}.${pad(
+      segments[minor],
+      minorDigits
+    )}.${pad(segments[patch], patchDigits)}`;
     const target = path.join(destination, `${env}_${formattedVersion}.apk`);
 
     if (fs.existsSync(target)) {
@@ -69,6 +75,6 @@ function isCrosswalkBuild() {
   );
 }
 
-function pad(segment: string, length: number = 2) {
-  return padStart(segment, length, '0');
+function pad(segment: string, length: number) {
+  return segment.padStart(length, '0');
 }

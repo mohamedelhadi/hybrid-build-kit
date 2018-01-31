@@ -272,11 +272,10 @@ function prepareEndpoint(env: string) {
 }
 
 async function prepareVersion(env: string) {
-  const versionDetails = await getEnvVersionDetails(env);
-  const version = {
-    version: versionDetails.version
-  };
-  return writeJSON('src/app/config/version.json', version);
+  const { version } = await getEnvVersionDetails(env);
+  return writeJSON('src/app/config/version.json', {
+    version
+  });
 }
 
 function writeJSON(filePath: string, content: any) {
