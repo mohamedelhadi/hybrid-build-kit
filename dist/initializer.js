@@ -1,5 +1,5 @@
 "use strict";
-import { environments } from './consts';
+import { environments, platforms } from './consts';
 import { getVersionDetails } from './version-helper';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -18,7 +18,7 @@ function initialize(env, platform) {
     console.log('Targeted Environment: ', chalk.yellow(`${env}`));
     console.log('Targeted Platform: ', chalk.yellow(`${platform}\n`));
     const copyPromise = copy(env);
-    const cordovaPromise = prepareCordovaConfig(env);
+    const cordovaPromise = prepareCordovaConfig(env, platform);
     const indexPromise = prepareIndex(env, platform);
     const endpointPromise = prepareEndpoint(env);
     const versionPromise = prepareVersion(env);
@@ -69,7 +69,11 @@ function copy(env) {
         resolve();
     });
 }
-async function prepareCordovaConfig(env) {
+async function prepareCordovaConfig(env, platform) {
+    if (platform === platforms.pwa) {
+        // a pwa don't use config.xml, so skip this preparation step
+        return Promise.resolve();
+    }
     console.log('Preparing config.xml...');
     const details = await getConfigDetails(env);
     return new Promise((resolve, reject) => {

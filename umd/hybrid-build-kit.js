@@ -24176,7 +24176,7 @@ function initialize(env, platform) {
     console.log('Targeted Environment: ', __WEBPACK_IMPORTED_MODULE_5_chalk___default.a.yellow("" + env));
     console.log('Targeted Platform: ', __WEBPACK_IMPORTED_MODULE_5_chalk___default.a.yellow(platform + "\n"));
     var copyPromise = copy(env);
-    var cordovaPromise = prepareCordovaConfig(env);
+    var cordovaPromise = prepareCordovaConfig(env, platform);
     var indexPromise = prepareIndex(env, platform);
     var endpointPromise = prepareEndpoint(env);
     var versionPromise = prepareVersion(env);
@@ -24228,12 +24228,16 @@ function copy(env) {
         resolve();
     });
 }
-function prepareCordovaConfig(env) {
+function prepareCordovaConfig(env, platform) {
     return initializer___awaiter(this, void 0, void 0, function () {
         var details;
         return initializer___generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (platform === platforms.pwa) {
+                        // a pwa don't use config.xml, so skip this preparation step
+                        return [2 /*return*/, Promise.resolve()];
+                    }
                     console.log('Preparing config.xml...');
                     return [4 /*yield*/, getConfigDetails(env)];
                 case 1:
@@ -24467,7 +24471,7 @@ function readJSON(filePath) {
 
 // CONCATENATED MODULE: ./src/finalizer.ts
 var finalizer_namespaceObject = {};
-__webpack_require__.d(finalizer_namespaceObject, "copyOutput", function() { return copyOutput; });
+__webpack_require__.d(finalizer_namespaceObject, "copyOutput", function() { return copyCordovaOutput; });
 /* harmony import */ var finalizer___WEBPACK_IMPORTED_MODULE_2_fs__ = __webpack_require__(0);
 /* harmony import */ var finalizer___WEBPACK_IMPORTED_MODULE_2_fs___default = __webpack_require__.n(finalizer___WEBPACK_IMPORTED_MODULE_2_fs__);
 /* harmony import */ var finalizer___WEBPACK_IMPORTED_MODULE_3_path__ = __webpack_require__(2);
@@ -24520,7 +24524,7 @@ var finalizer___generator = (this && this.__generator) || function (thisArg, bod
 
 var finalizer_root = process.cwd();
 
-function copyOutput(env, platform) {
+function copyCordovaOutput(env, platform) {
     return finalizer___awaiter(this, void 0, void 0, function () {
         var crosswalkBuild, releaseApk, debugApk, source, destination, segments, formattedVersion, target, err;
         return finalizer___generator(this, function (_a) {

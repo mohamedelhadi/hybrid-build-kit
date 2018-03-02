@@ -14,9 +14,9 @@ import chalk from 'chalk';
 
 const root = process.cwd();
 
-export { copyOutput };
+export { copyCordovaOutput as copyOutput };
 
-async function copyOutput(env: string, platform: string) {
+async function copyCordovaOutput(env: string, platform: string) {
   if (platform === platforms.android) {
     console.log('Copying ' + platform + ' build output..');
     const crosswalkBuild = isCrosswalkBuild();

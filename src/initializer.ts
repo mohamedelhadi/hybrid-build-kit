@@ -22,7 +22,7 @@ function initialize(env: string, platform: string) {
   console.log('Targeted Platform: ', chalk.yellow(`${platform}\n`));
 
   const copyPromise = copy(env);
-  const cordovaPromise = prepareCordovaConfig(env);
+  const cordovaPromise = prepareCordovaConfig(env, platform);
   const indexPromise = prepareIndex(env, platform);
   const endpointPromise = prepareEndpoint(env);
   const versionPromise = prepareVersion(env);
@@ -80,7 +80,11 @@ function copy(env: string) {
   });
 }
 
-async function prepareCordovaConfig(env: string) {
+async function prepareCordovaConfig(env: string, platform: string) {
+  if (platform === platforms.pwa) {
+    // a pwa don't use config.xml, so skip this preparation step
+    return Promise.resolve();
+  }
   console.log('Preparing config.xml...');
   const details = await getConfigDetails(env);
   return new Promise((resolve, reject) => {

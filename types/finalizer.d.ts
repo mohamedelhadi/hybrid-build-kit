@@ -1,2 +1,2 @@
-export { copyOutput };
-declare function copyOutput(env: string, platform: string): Promise<void>;
+export { copyCordovaOutput as copyOutput };
+declare function copyCordovaOutput(env: string, platform: string): Promise<void>;

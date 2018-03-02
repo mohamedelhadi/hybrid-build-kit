@@ -6,8 +6,8 @@ import * as path from 'path';
 import * as shelljs from 'shelljs';
 import chalk from 'chalk';
 const root = process.cwd();
-export { copyOutput };
-async function copyOutput(env, platform) {
+export { copyCordovaOutput as copyOutput };
+async function copyCordovaOutput(env, platform) {
     if (platform === platforms.android) {
         console.log('Copying ' + platform + ' build output..');
         const crosswalkBuild = isCrosswalkBuild();
