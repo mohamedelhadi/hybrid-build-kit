@@ -20,10 +20,10 @@ async function copyCordovaOutput(env: string, platform: string) {
   if (platform === platforms.android) {
     console.log('Copying ' + platform + ' build output..');
     const crosswalkBuild = isCrosswalkBuild();
-    const releaseApk = `platforms/android/build/outputs/apk/${
+    const releaseApk = `platforms/android/build/outputs/apk/release/${
       crosswalkBuild ? 'android-armv7-release' : 'android-release'
     }.apk`;
-    const debugApk = `platforms/android/build/outputs/apk/${
+    const debugApk = `platforms/android/build/outputs/apk/debug/${
       crosswalkBuild ? 'android-armv7-debug' : 'android-debug'
     }.apk`;
     const source = path.join(

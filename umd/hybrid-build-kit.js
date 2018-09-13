@@ -24533,8 +24533,8 @@ function copyCordovaOutput(env, platform) {
                     if (!(platform === platforms.android)) return [3 /*break*/, 2];
                     console.log('Copying ' + platform + ' build output..');
                     crosswalkBuild = isCrosswalkBuild();
-                    releaseApk = "platforms/android/build/outputs/apk/" + (crosswalkBuild ? 'android-armv7-release' : 'android-release') + ".apk";
-                    debugApk = "platforms/android/build/outputs/apk/" + (crosswalkBuild ? 'android-armv7-debug' : 'android-debug') + ".apk";
+                    releaseApk = "platforms/android/build/outputs/apk/release/" + (crosswalkBuild ? 'android-armv7-release' : 'android-release') + ".apk";
+                    debugApk = "platforms/android/build/outputs/apk/debug/" + (crosswalkBuild ? 'android-armv7-debug' : 'android-debug') + ".apk";
                     source = finalizer___WEBPACK_IMPORTED_MODULE_3_path__["join"](finalizer_root, env === environments.production || env === environments.staging
                         ? releaseApk
                         : debugApk);
