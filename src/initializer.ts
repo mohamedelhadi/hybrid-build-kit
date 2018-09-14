@@ -241,7 +241,7 @@ async function getConfigDetails(env: string) {
     case environments.production:
       break;
     default:
-      packageName = packageName + env;
+      packageName = packageName + '.' + env;
       appName = appName + ' - ' + env;
   }
   return {
