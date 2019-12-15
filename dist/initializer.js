@@ -87,7 +87,9 @@ async function prepareCordovaConfig(env, platform) {
         $('access')
             .first()
             .attr('origin', details.origin);
-        $('allow-navigation').attr('href', details.origin);
+        $('allow-navigation')
+            .first()
+            .attr('href', details.origin);
         $('widget').attr('version', details.versionDetails.version);
         $('widget').attr('android-versionCode', details.versionDetails.androidVersionCode);
         $('widget').attr('ios-CFBundleVersion', details.versionDetails.version);
